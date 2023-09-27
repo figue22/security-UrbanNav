@@ -4,3 +4,4 @@ export * from './login.model';
 export * from './variables.model';
 export * from './menu.model';
 export * from './rol-menu.model';
+export * from './credenciales.model';
