@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication/dist/decorators';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -19,6 +20,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {Credenciales, FactorDeAutenticacionPorCodigo, Login, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {SeguridadUsuarioService} from '../services';
@@ -73,6 +75,10 @@ export class UsuarioController {
     return this.usuarioRepository.count(where);
   }
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   @get('/usuario')
   @response(200, {
     description: 'Array of Usuario model instances',
@@ -224,16 +230,16 @@ export class UsuarioController {
       let token = this.servicioSeguridad.crearToken(usuario)
       if (usuario) {
         usuario.clave = "";
-        try{
+        try {
           this.usuarioRepository.logins(usuario._id).patch({
             estadoCodigo2fa: true,
             token: token,
-          },{
+          }, {
             estadoCodigo2fa: false
           })
-      }catch{
-        console.log("No se ha almacenado el cambio del estado de token en la db")
-      }
+        } catch {
+          console.log("No se ha almacenado el cambio del estado de token en la db")
+        }
         return {
           user: usuario,
           token: token

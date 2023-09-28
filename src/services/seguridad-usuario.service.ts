@@ -1,8 +1,8 @@
 import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {Credenciales, FactorDeAutenticacionPorCodigo, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
-import {ConfiguracionSeguridad} from '../config/seguridad.config';
 var jwt = require('jsonwebtoken');
 var generator = require('generate-password');
 const MD5 = require("crypto-js/md5");
@@ -68,15 +68,15 @@ export class SeguridadUsuarioService {
    * @param credenciales2fa credenciales del usuario con el codigo del 2fa
    * @returns un usuario o null
    */
-  async validarCodigo2fa(credenciales2fa: FactorDeAutenticacionPorCodigo): Promise<Usuario | null>{
+  async validarCodigo2fa(credenciales2fa: FactorDeAutenticacionPorCodigo): Promise<Usuario | null> {
     let login = await this.repositorioLogin.findOne({
-      where:{
+      where: {
         usuarioId: credenciales2fa.usuarioId,
         codigo2fa: credenciales2fa.codigo2fa,
         estadoCodigo2fa: false
       }
     })
-    if(login){
+    if (login) {
       let usuario = await this.repositorioUsuario.findById(credenciales2fa.usuarioId)
       return usuario
     }
@@ -88,14 +88,24 @@ export class SeguridadUsuarioService {
    * @param usuario informacion del usuario
    * @returns token
    */
-  crearToken(usuario: Usuario): string{
-    let datos= {
+  crearToken(usuario: Usuario): string {
+    let datos = {
       name: `${usuario.primerNombre} ${usuario.segundoNombre} ${usuario.primerApellido} ${usuario.segundoApellido}`,
       role: usuario.rolId,
       email: usuario.correo
     };
     let token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
     return token
+  }
+
+  /**
+   *Valida y obtiene el rol de un token
+   * @param tk el token
+   * @returns el _id del rol
+   */
+  obtenerRolDesdeToken(tk: string): string {
+    let obj = jwt.verify(tk, ConfiguracionSeguridad.claveJWT)
+    return obj.role;
   }
 }
 
