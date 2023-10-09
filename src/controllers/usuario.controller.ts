@@ -68,6 +68,9 @@ export class UsuarioController {
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
     return this.usuarioRepository.create(usuario);
+
+    //TODO: CREAR EL USUARIO EN EL MICROSERVICIO DE LÓGICA
+    //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
   }
 
   @get('/usuario/count')
@@ -101,6 +104,8 @@ export class UsuarioController {
   async find(
     @param.filter(Usuario) filter?: Filter<Usuario>,
   ): Promise<Usuario[]> {
+    //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DE TODOS
+    //? LOS USUARIOS
     return this.usuarioRepository.find(filter);
   }
 
@@ -208,6 +213,7 @@ export class UsuarioController {
       await this.loginRepository.create(login);
       usuario.clave = '';
       //notificar al usuario via sms
+
       return usuario;
     }
     return new HttpErrors[401]('Credenciales incorrectas');
@@ -229,6 +235,8 @@ export class UsuarioController {
   ): Promise<object> {
     const usuario = await this.servicioSeguridad.validarCodigo2fa(credenciales);
     if (usuario) {
+      //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DEL USUARIO
+      //? Y QUE EL TOKEN TENGA TODA LA INFO DEL USUARIO
       const token = this.servicioSeguridad.crearToken(usuario);
       if (usuario) {
         usuario.clave = '';
@@ -247,6 +255,9 @@ export class UsuarioController {
             'No se ha almacenado el cambio del estado de token en la db',
           );
         }
+
+        //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DEL USUARIO
+
         return {
           user: usuario,
           token: token,

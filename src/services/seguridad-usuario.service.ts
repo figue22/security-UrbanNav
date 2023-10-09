@@ -119,4 +119,12 @@ export class SeguridadUsuarioService {
     );
     return claveCifrada;
   }
+
+  async obtenerInformacionUsuarioEnLogica( id: string ) {
+    //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
+  }
+
+  async obtenerInformacionUsuariosEnLogica( ) {
+    //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE TODOS LOS USUARIOS
+  }
 }
