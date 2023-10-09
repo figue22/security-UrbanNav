@@ -6,6 +6,7 @@ import {LoginRepository, UsuarioRepository} from '../repositories';
 const jwt = require('jsonwebtoken');
 const generator = require('generate-password');
 const MD5 = require('crypto-js/md5');
+import axios from 'axios'
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class SeguridadUsuarioService {
@@ -118,6 +119,18 @@ export class SeguridadUsuarioService {
       {correo: correo},
     );
     return claveCifrada;
+  }
+
+  async crearUsuarioEnLogica( informacion: object, tipoUsuario: string ) {
+    if(tipoUsuario === "CLIENTE") {
+
+    }
+    if(tipoUsuario === "CONDUCTOR") {
+
+    }
+    if(tipoUsuario === "ADMINISTRADOR") {
+
+    }
   }
 
   async obtenerInformacionUsuarioEnLogica( id: string ) {

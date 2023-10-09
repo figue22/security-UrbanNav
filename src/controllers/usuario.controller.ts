@@ -69,6 +69,21 @@ export class UsuarioController {
     //enviar correo electronico de notificacion
     return this.usuarioRepository.create(usuario);
 
+    let idRolCliente = "65243b86591891311c031c97"
+    let idRolConductor = "65243b9b591891311c031c98"
+    let idRolAdministrador = "65145f6950ef6641e8e8d370"
+
+    if(usuario.rolId=== idRolCliente) {
+
+    }
+    if(usuario.rolId=== idRolConductor) {
+
+    }
+    if(usuario.rolId=== idRolAdministrador) {
+
+    }
+
+
     //TODO: CREAR EL USUARIO EN EL MICROSERVICIO DE LÓGICA
     //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
   }

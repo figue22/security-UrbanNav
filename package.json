@@ -57,6 +57,7 @@
     "@loopback/rest-explorer": "^6.1.3",
     "@loopback/security": "^0.10.3",
     "@loopback/service-proxy": "^6.1.3",
+    "axios": "^1.5.1",
     "crypto-js": "^4.1.1",
     "generate-password": "^1.7.0",
     "jsonwebtoken": "^9.0.2",
