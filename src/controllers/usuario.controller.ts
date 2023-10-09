@@ -69,23 +69,23 @@ export class UsuarioController {
     //enviar correo electronico de notificacion
     return this.usuarioRepository.create(usuario);
 
-    let idRolCliente = "65243b86591891311c031c97"
-    let idRolConductor = "65243b9b591891311c031c98"
-    let idRolAdministrador = "65145f6950ef6641e8e8d370"
+    // let idRolCliente = "65243b86591891311c031c97"
+    // let idRolConductor = "65243b9b591891311c031c98"
+    // let idRolAdministrador = "65145f6950ef6641e8e8d370"
 
-    if(usuario.rolId=== idRolCliente) {
+    // if(usuario.rolId=== idRolCliente) {
 
-    }
-    if(usuario.rolId=== idRolConductor) {
+    // }
+    // if(usuario.rolId=== idRolConductor) {
 
-    }
-    if(usuario.rolId=== idRolAdministrador) {
+    // }
+    // if(usuario.rolId=== idRolAdministrador) {
 
-    }
+    // }
 
 
-    //TODO: CREAR EL USUARIO EN EL MICROSERVICIO DE LÓGICA
-    //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
+    // //TODO: CREAR EL USUARIO EN EL MICROSERVICIO DE LÓGICA
+    // //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
   }
 
   @get('/usuario/count')
@@ -250,9 +250,27 @@ export class UsuarioController {
   ): Promise<object> {
     const usuario = await this.servicioSeguridad.validarCodigo2fa(credenciales);
     if (usuario) {
-      //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DEL USUARIO
-      //? Y QUE EL TOKEN TENGA TODA LA INFO DEL USUARIO
-      const token = this.servicioSeguridad.crearToken(usuario);
+      console.log(usuario)
+      let idRolCliente = "65243b86591891311c031c97"
+      let idRolConductor = "65243b9b591891311c031c98"
+      let idRolAdministrador = "65145f6950ef6641e8e8d370"
+
+      let usuarioLogica = null
+
+      if(usuario.rolId == idRolCliente) {
+        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "CLIENTE" )
+      }
+      if(usuario.rolId == idRolConductor) {
+        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "CONDUCTOR" )
+      }
+      if(usuario.rolId == idRolAdministrador) {
+        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "ADMINISTRADOR" )
+      }
+
+      console.log("--- usuario en lógica ---------")
+      console.log(usuarioLogica)
+
+      const token = this.servicioSeguridad.crearToken(usuario, usuarioLogica);
       if (usuario) {
         usuario.clave = '';
         try {

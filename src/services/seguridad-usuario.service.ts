@@ -1,12 +1,12 @@
-import {/* inject, */ BindingScope, injectable} from '@loopback/core';
+import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
+import axios from 'axios';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {Credenciales, FactorDeAutenticacionPorCodigo, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 const jwt = require('jsonwebtoken');
 const generator = require('generate-password');
 const MD5 = require('crypto-js/md5');
-import axios from 'axios'
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class SeguridadUsuarioService {
@@ -16,7 +16,7 @@ export class SeguridadUsuarioService {
 
     @repository(LoginRepository)
     public repositorioLogin: LoginRepository,
-  ) {}
+  ) { }
   /*
    * Add service methods here
    */
@@ -91,11 +91,12 @@ export class SeguridadUsuarioService {
    * @param usuario informacion del usuario
    * @returns token
    */
-  crearToken(usuario: Usuario): string {
+  crearToken(usuario: any, usuarioLogica: any): string {
     const datos = {
-      name: `${usuario.primerNombre} ${usuario.segundoNombre} ${usuario.primerApellido} ${usuario.segundoApellido}`,
-      role: usuario.rolId,
-      email: usuario.correo,
+      name: `${usuarioLogica.primerNombre}`,
+      role: `${usuario.rolId}`,
+      email: `${usuario.correo}`,
+      idMongoDB: `${usuarioLogica.idMongoDB}`
     };
     const token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
     return token;
@@ -121,23 +122,30 @@ export class SeguridadUsuarioService {
     return claveCifrada;
   }
 
-  async crearUsuarioEnLogica( informacion: object, tipoUsuario: string ) {
-    if(tipoUsuario === "CLIENTE") {
-
-    }
-    if(tipoUsuario === "CONDUCTOR") {
-
-    }
-    if(tipoUsuario === "ADMINISTRADOR") {
-
-    }
-  }
-
-  async obtenerInformacionUsuarioEnLogica( id: string ) {
+  async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
+    console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
+    if (rol === "CLIENTE") {
+      console.log("si es cliente")
+      const response = await axios.get(`http://localhost:3000/cliente/mongo/${id}`)
+      console.log(response)
+      return response.data
+    }
+    if (rol === "CONDUCTOR") {
+      console.log("si es cliente")
+      const response = await axios.get(`http://localhost:3000/conductor/mongo/${id}`)
+      console.log(response)
+      return response.data
+    }
+    if (rol === "ADMINISTRADOR") {
+      console.log("si es cliente")
+      const response = await axios.get(`http://localhost:3000/administrador/mongo/${id}`)
+      console.log(response)
+      return response.data
+    }
   }
 
-  async obtenerInformacionUsuariosEnLogica( ) {
+  async obtenerInformacionUsuariosEnLogica() {
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE TODOS LOS USUARIOS
   }
 }

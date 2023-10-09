@@ -15,36 +15,8 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  primerNombre: string;
-
-  @property({
-    type: 'string',
-  })
-  segundoNombre?: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  primerApellido: string;
-
-  @property({
-    type: 'string',
-  })
-  segundoApellido?: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
   correo: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  celular: string;
-  
   @property({
     type: 'string',
   })
