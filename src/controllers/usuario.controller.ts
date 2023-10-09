@@ -21,7 +21,13 @@ import {
   response,
 } from '@loopback/rest';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
-import {Credenciales, FactorDeAutenticacionPorCodigo, Login, Usuario} from '../models';
+import {
+  Credenciales,
+  FactorDeAutenticacionPorCodigo,
+  Login,
+  RecuperacionClave,
+  Usuario,
+} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {SeguridadUsuarioService} from '../services';
 
@@ -33,7 +39,7 @@ export class UsuarioController {
     public servicioSeguridad: SeguridadUsuarioService,
     @repository(LoginRepository)
     public loginRepository: LoginRepository,
-  ) { }
+  ) {}
 
   @post('/usuario')
   @response(200, {
@@ -54,10 +60,10 @@ export class UsuarioController {
     usuario: Omit<Usuario, '_id'>,
   ): Promise<Usuario> {
     // crear la clave}
-    let clave = this.servicioSeguridad.crearTextoAleatorio(10);
-    console.log(clave)
+    const clave = this.servicioSeguridad.crearTextoAleatorio(10);
+    console.log(clave);
     //cifrar la clave
-    let claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
+    const claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
     //asignar la clave cifrada al usuario
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
@@ -69,15 +75,16 @@ export class UsuarioController {
     description: 'Usuario model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Usuario) where?: Where<Usuario>,
-  ): Promise<Count> {
+  async count(@param.where(Usuario) where?: Where<Usuario>): Promise<Count> {
     return this.usuarioRepository.count(where);
   }
 
   @authenticate({
-    strategy: "auth",
-    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+    strategy: 'auth',
+    options: [
+      ConfiguracionSeguridad.menuUsuarioId,
+      ConfiguracionSeguridad.listarAccion,
+    ],
   })
   @get('/usuario')
   @response(200, {
@@ -127,7 +134,8 @@ export class UsuarioController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Usuario, {exclude: 'where'}) filter?: FilterExcludingWhere<Usuario>
+    @param.filter(Usuario, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Usuario>,
   ): Promise<Usuario> {
     return this.usuarioRepository.findById(id, filter);
   }
@@ -174,80 +182,112 @@ export class UsuarioController {
 
   @post('/identificar-usuario')
   @response(200, {
-    description: "Identificar un usuario por correo y clave",
-    content: {'application/json': {schema: getModelSchemaRef(Credenciales)}}
+    description: 'Identificar un usuario por correo y clave',
+    content: {'application/json': {schema: getModelSchemaRef(Credenciales)}},
   })
   async indentificarUsuario(
-    @requestBody(
-      {
-        content: {
-          'application/json': {
-            schema: getModelSchemaRef(Credenciales)
-          }
-        }
-      }
-    )
-    credenciales: Credenciales
-
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Credenciales),
+        },
+      },
+    })
+    credenciales: Credenciales,
   ): Promise<object> {
-    let usuario = await this.servicioSeguridad.identificarUsuario(credenciales)
+    const usuario =
+      await this.servicioSeguridad.identificarUsuario(credenciales);
     if (usuario) {
-      let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
-      let login: Login = new Login();
+      const codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
+      const login: Login = new Login();
       login.usuarioId = usuario._id!;
-      login.codigo2fa = codigo2fa
+      login.codigo2fa = codigo2fa;
       login.estadoCodigo2fa = false;
-      login.token = "";
+      login.token = '';
       login.estadoToken = false;
-      this.loginRepository.create(login)
-      usuario.clave = "";
+      await this.loginRepository.create(login);
+      usuario.clave = '';
       //notificar al usuario via sms
       return usuario;
     }
-    return new HttpErrors[401]("Credenciales incorrectas")
-
+    return new HttpErrors[401]('Credenciales incorrectas');
   }
 
   @post('/verificar-2fa')
   @response(200, {
-    description: "Validar un codigo de 2fa"
+    description: 'Validar un codigo de 2fa',
   })
-  async VerificarCodigo2fa(
-    @requestBody(
-      {
-        content: {
-          'application/json': {
-            schema: getModelSchemaRef(FactorDeAutenticacionPorCodigo)
-          }
-        }
-      }
-    )
-    credenciales: FactorDeAutenticacionPorCodigo
-
+  async verificarCodigo2fa(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(FactorDeAutenticacionPorCodigo),
+        },
+      },
+    })
+    credenciales: FactorDeAutenticacionPorCodigo,
   ): Promise<object> {
-    let usuario = await this.servicioSeguridad.validarCodigo2fa(credenciales)
+    const usuario = await this.servicioSeguridad.validarCodigo2fa(credenciales);
     if (usuario) {
-      let token = this.servicioSeguridad.crearToken(usuario)
+      const token = this.servicioSeguridad.crearToken(usuario);
       if (usuario) {
-        usuario.clave = "";
+        usuario.clave = '';
         try {
-          this.usuarioRepository.logins(usuario._id).patch({
-            estadoCodigo2fa: true,
-            token: token,
-          }, {
-            estadoCodigo2fa: false
-          })
+          await this.usuarioRepository.logins(usuario._id).patch(
+            {
+              estadoCodigo2fa: true,
+              token: token,
+            },
+            {
+              estadoCodigo2fa: false,
+            },
+          );
         } catch {
-          console.log("No se ha almacenado el cambio del estado de token en la db")
+          console.log(
+            'No se ha almacenado el cambio del estado de token en la db',
+          );
         }
         return {
           user: usuario,
-          token: token
+          token: token,
         };
       }
     }
-    return new HttpErrors[401]("Codigo de 2fa invalido para el usuario definido")
-
+    return new HttpErrors[401](
+      'Codigo de 2fa invalido para el usuario definido',
+    );
   }
 
+  //Recuperar clave
+  @post('/recuperar-clave')
+  @response(200, {
+    description: 'Recuperar clave de un usuario',
+  })
+  async recuperarClave(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(RecuperacionClave),
+        },
+      },
+    })
+    recuperacionClave: RecuperacionClave,
+  ): Promise<object> {
+    const usuarioEncontrado = await this.usuarioRepository.findOne({
+      where: {
+        correo: recuperacionClave.correo,
+      },
+    });
+    if (usuarioEncontrado) {
+      const nuevaClave = await this.servicioSeguridad.recuperarContrasena(
+        usuarioEncontrado.correo,
+      );
+      //TODO: enviar correo electronico con la nueva clave al usuario
+      return {
+        mensaje: `La nueva clave ha sido generada, usuario: ${usuarioEncontrado.correo}`,
+        nuevaClave
+      };
+    }
+    return new HttpErrors[401]('No existe un usuario con el correo definido');
+  }
 }

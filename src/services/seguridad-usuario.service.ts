@@ -1,11 +1,11 @@
-import { /* inject, */ BindingScope, injectable} from '@loopback/core';
+import {/* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {Credenciales, FactorDeAutenticacionPorCodigo, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
-var jwt = require('jsonwebtoken');
-var generator = require('generate-password');
-const MD5 = require("crypto-js/md5");
+const jwt = require('jsonwebtoken');
+const generator = require('generate-password');
+const MD5 = require('crypto-js/md5');
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class SeguridadUsuarioService {
@@ -14,53 +14,51 @@ export class SeguridadUsuarioService {
     public repositorioUsuario: UsuarioRepository,
 
     @repository(LoginRepository)
-    public repositorioLogin: LoginRepository
-  ) { }
+    public repositorioLogin: LoginRepository,
+  ) {}
   /*
    * Add service methods here
    */
 
-
-
   /**
- * Metodo que sirve para crear una clave aleatoria.
- * @returns cadena aleatoria de n caracteres
- */
+   * Metodo que sirve para crear una clave aleatoria.
+   * @returns cadena aleatoria de n caracteres
+   */
   crearTextoAleatorio(n: number): string {
-    let clave = generator.generate({
+    const clave = generator.generate({
       length: n,
-      numbers: true
+      numbers: true,
     });
-    return clave
+    return clave;
   }
 
   /**
-  * Cifrar una cadena con metodo md5
-  * @param cadena texto a cifrar
-  * @returns cadena cifrada con md5
-  */
+   * Cifrar una cadena con metodo md5
+   * @param cadena texto a cifrar
+   * @returns cadena cifrada con md5
+   */
 
   cifrarTexto(cadena: string): string {
-    let cadenaCifrada = MD5(cadena).toString();
-    return cadenaCifrada
+    const cadenaCifrada = MD5(cadena).toString();
+    return cadenaCifrada;
   }
 
   /**
-  * Se busca un usuario por sus credenciales de acceso
-  * @param credenciales crdenciales del usuario
-  * @returns usuario encontrado o null
-  */
+   * Se busca un usuario por sus credenciales de acceso
+   * @param credenciales crdenciales del usuario
+   * @returns usuario encontrado o null
+   */
 
-
-  async identificarUsuario(credenciales: Credenciales): Promise<Usuario | null> {
-    let usuario = await this.repositorioUsuario.findOne({
+  async identificarUsuario(
+    credenciales: Credenciales,
+  ): Promise<Usuario | null> {
+    const usuario = await this.repositorioUsuario.findOne({
       where: {
         correo: credenciales.correo,
-        clave: credenciales.clave
-      }
+        clave: credenciales.clave,
+      },
     });
     return usuario as Usuario;
-
   }
 
   /**
@@ -68,19 +66,23 @@ export class SeguridadUsuarioService {
    * @param credenciales2fa credenciales del usuario con el codigo del 2fa
    * @returns un usuario o null
    */
-  async validarCodigo2fa(credenciales2fa: FactorDeAutenticacionPorCodigo): Promise<Usuario | null> {
-    let login = await this.repositorioLogin.findOne({
+  async validarCodigo2fa(
+    credenciales2fa: FactorDeAutenticacionPorCodigo,
+  ): Promise<Usuario | null> {
+    const login = await this.repositorioLogin.findOne({
       where: {
         usuarioId: credenciales2fa.usuarioId,
         codigo2fa: credenciales2fa.codigo2fa,
-        estadoCodigo2fa: false
-      }
-    })
+        estadoCodigo2fa: false,
+      },
+    });
     if (login) {
-      let usuario = await this.repositorioUsuario.findById(credenciales2fa.usuarioId)
-      return usuario
+      const usuario = await this.repositorioUsuario.findById(
+        credenciales2fa.usuarioId,
+      );
+      return usuario;
     }
-    return null
+    return null;
   }
 
   /**
@@ -89,13 +91,13 @@ export class SeguridadUsuarioService {
    * @returns token
    */
   crearToken(usuario: Usuario): string {
-    let datos = {
+    const datos = {
       name: `${usuario.primerNombre} ${usuario.segundoNombre} ${usuario.primerApellido} ${usuario.segundoApellido}`,
       role: usuario.rolId,
-      email: usuario.correo
+      email: usuario.correo,
     };
-    let token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
-    return token
+    const token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
+    return token;
   }
 
   /**
@@ -104,10 +106,17 @@ export class SeguridadUsuarioService {
    * @returns el _id del rol
    */
   obtenerRolDesdeToken(tk: string): string {
-    let obj = jwt.verify(tk, ConfiguracionSeguridad.claveJWT)
+    const obj = jwt.verify(tk, ConfiguracionSeguridad.claveJWT);
     return obj.role;
   }
+
+  async recuperarContrasena(correo: string): Promise<string> {
+    const clave = this.crearTextoAleatorio(6);
+    const claveCifrada = this.cifrarTexto(clave);
+    await this.repositorioUsuario.updateAll(
+      {clave: claveCifrada},
+      {correo: correo},
+    );
+    return claveCifrada;
+  }
 }
-
-
-
