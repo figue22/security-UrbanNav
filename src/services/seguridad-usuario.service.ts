@@ -126,26 +126,64 @@ export class SeguridadUsuarioService {
     console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
     if (rol === "CLIENTE") {
-      console.log("si es cliente")
       const response = await axios.get(`http://localhost:3000/cliente/mongo/${id}`)
-      console.log(response)
       return response.data
     }
     if (rol === "CONDUCTOR") {
-      console.log("si es cliente")
       const response = await axios.get(`http://localhost:3000/conductor/mongo/${id}`)
-      console.log(response)
       return response.data
     }
     if (rol === "ADMINISTRADOR") {
-      console.log("si es cliente")
       const response = await axios.get(`http://localhost:3000/administrador/mongo/${id}`)
-      console.log(response)
       return response.data
     }
   }
 
-  async obtenerInformacionUsuariosEnLogica() {
-    //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE TODOS LOS USUARIOS
+  async obtenerInformacionUsuariosEnLogica(usuarios: Usuario[]) {
+
+    let idRolCliente = "65243b86591891311c031c97"
+    let idRolConductor = "65243b9b591891311c031c98"
+    let idRolAdministrador = "65145f6950ef6641e8e8d370"
+
+    let usuariosCompletos = usuarios.map(async(usuario) => {
+
+      if(usuario.rolId == idRolCliente) {
+        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+          usuario._id!,
+          "CLIENTE"
+        )
+       return  {
+          usuario,
+          usuarioLogica: usuarioLogica ? usuarioLogica : null
+       }
+      }
+
+      if(usuario.rolId == idRolConductor) {
+        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+          usuario._id!,
+          "CONDUCTOR"
+        )
+
+        return {
+          usuario,
+          usuarioLogica: usuarioLogica ? usuarioLogica : null
+        }
+      }
+
+      if(usuario.rolId == idRolAdministrador) {
+        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+          usuario._id!,
+          "ADMINISTRADOR"
+        )
+        return {
+          usuario,
+          usuarioLogica: usuarioLogica ? usuarioLogica : null
+        }
+      }
+
+    })
+
+    return Promise.all(usuariosCompletos)
+
   }
 }

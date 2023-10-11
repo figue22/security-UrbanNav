@@ -1,4 +1,3 @@
-import {authenticate} from '@loopback/authentication/dist/decorators';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -20,7 +19,6 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {
   Credenciales,
   FactorDeAutenticacionPorCodigo,
@@ -39,7 +37,7 @@ export class UsuarioController {
     public servicioSeguridad: SeguridadUsuarioService,
     @repository(LoginRepository)
     public loginRepository: LoginRepository,
-  ) {}
+  ) { }
 
   @post('/usuario')
   @response(200, {
@@ -97,13 +95,13 @@ export class UsuarioController {
     return this.usuarioRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'auth',
-    options: [
-      ConfiguracionSeguridad.menuUsuarioId,
-      ConfiguracionSeguridad.listarAccion,
-    ],
-  })
+  // @authenticate({
+  //   strategy: 'auth',
+  //   options: [
+  //     ConfiguracionSeguridad.menuUsuarioId,
+  //     ConfiguracionSeguridad.listarAccion,
+  //   ],
+  // })
   @get('/usuario')
   @response(200, {
     description: 'Array of Usuario model instances',
@@ -118,10 +116,12 @@ export class UsuarioController {
   })
   async find(
     @param.filter(Usuario) filter?: Filter<Usuario>,
-  ): Promise<Usuario[]> {
-    //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DE TODOS
-    //? LOS USUARIOS
-    return this.usuarioRepository.find(filter);
+  ): Promise<any[]> {
+
+    let usuarios = await this.usuarioRepository.find(filter);
+    let usuariosCompletos = await this.servicioSeguridad.obtenerInformacionUsuariosEnLogica(usuarios)
+
+    return usuariosCompletos;
   }
 
   @patch('/usuario')
@@ -257,14 +257,14 @@ export class UsuarioController {
 
       let usuarioLogica = null
 
-      if(usuario.rolId == idRolCliente) {
-        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "CLIENTE" )
+      if (usuario.rolId == idRolCliente) {
+        usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
       }
-      if(usuario.rolId == idRolConductor) {
-        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "CONDUCTOR" )
+      if (usuario.rolId == idRolConductor) {
+        usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CONDUCTOR")
       }
-      if(usuario.rolId == idRolAdministrador) {
-        usuarioLogica =  await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica( usuario._id!, "ADMINISTRADOR" )
+      if (usuario.rolId == idRolAdministrador) {
+        usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "ADMINISTRADOR")
       }
 
       console.log("--- usuario en lógica ---------")
@@ -289,10 +289,9 @@ export class UsuarioController {
           );
         }
 
-        //TODO: LLAMAR AL MICROSERVICIO DE LÓGICA PARA OBTENER LA INFO DEL USUARIO
-
         return {
           user: usuario,
+          usuarioLogica,
           token: token,
         };
       }
