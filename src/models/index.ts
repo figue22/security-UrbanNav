@@ -7,3 +7,4 @@ export * from './rol-menu.model';
 export * from './credenciales.model';
 export * from './factor-de-autenticacion-por-codigo.model';
 export * from './recuperacion-clave.model';
+export * from './administrador-logica.model';

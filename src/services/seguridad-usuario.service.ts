@@ -122,6 +122,22 @@ export class SeguridadUsuarioService {
     return claveCifrada;
   }
 
+  async crearAdministradorLogica(mongoId: string, usuarioLogica: any) {
+    console.log({
+      mongoId,
+      usuarioLogica
+    })
+    const administradorLogica = {
+      primerNombre: usuarioLogica.primerNombre,
+      segundoNombre: usuarioLogica.segundoNombre,
+      primerApellido: usuarioLogica.primerApellido,
+      segundoApellido: usuarioLogica.segundoApellido,
+      idMongoDB: mongoId
+    }
+    const response = await axios.post("http://localhost:3000/administrador", administradorLogica)
+    return response.data
+  }
+
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
     console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
@@ -145,21 +161,21 @@ export class SeguridadUsuarioService {
     let idRolConductor = "65243b9b591891311c031c98"
     let idRolAdministrador = "65145f6950ef6641e8e8d370"
 
-    let usuariosCompletos = usuarios.map(async(usuario) => {
+    let usuariosCompletos = usuarios.map(async (usuario) => {
 
-      if(usuario.rolId == idRolCliente) {
-        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+      if (usuario.rolId == idRolCliente) {
+        const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "CLIENTE"
         )
-       return  {
+        return {
           usuario,
           usuarioLogica: usuarioLogica ? usuarioLogica : null
-       }
+        }
       }
 
-      if(usuario.rolId == idRolConductor) {
-        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+      if (usuario.rolId == idRolConductor) {
+        const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "CONDUCTOR"
         )
@@ -170,8 +186,8 @@ export class SeguridadUsuarioService {
         }
       }
 
-      if(usuario.rolId == idRolAdministrador) {
-        const usuarioLogica =  await this.obtenerInformacionUsuarioEnLogica(
+      if (usuario.rolId == idRolAdministrador) {
+        const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "ADMINISTRADOR"
         )

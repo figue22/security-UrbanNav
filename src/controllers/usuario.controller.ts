@@ -1,4 +1,3 @@
-import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -20,8 +19,8 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {
+  AdministradorLogica,
   Credenciales,
   FactorDeAutenticacionPorCodigo,
   Login,
@@ -41,6 +40,7 @@ export class UsuarioController {
     public loginRepository: LoginRepository,
   ) { }
 
+  //? USUARIO NORMAL (NO ADMIN, NO CLIENTE, NO CONDUCTOR)
   @post('/usuario')
   @response(200, {
     description: 'Usuario model instance',
@@ -88,6 +88,44 @@ export class UsuarioController {
     // //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
   }
 
+  @post('/usuario/admin')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {'application/json': {schema: getModelSchemaRef(AdministradorLogica)}},
+  })
+  async createAdmin(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(AdministradorLogica)
+        }
+      }
+    })
+    usuario: AdministradorLogica,
+  ): Promise<any> {
+    console.log("USUARIO", usuario)
+    // crear la clave}
+    const clave = this.servicioSeguridad.crearTextoAleatorio(10);
+    console.log(clave);
+    //cifrar la clave
+    const claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
+    //asignar la clave cifrada al usuario
+    usuario.clave = claveCifrada;
+    //enviar correo electronico de notificacion
+    const usuarioCreado = await this.usuarioRepository.create({
+      correo: usuario.correo,
+      clave: usuario.clave,
+      rolId: "65145f6950ef6641e8e8d370"
+    });
+
+    const usuarioLogica = await this.servicioSeguridad.crearAdministradorLogica(usuarioCreado._id!, usuario)
+
+    return {
+      usuario: usuarioCreado,
+      usuarioLogica
+    }
+  }
+
   @get('/usuario/count')
   @response(200, {
     description: 'Usuario model count',
@@ -97,13 +135,13 @@ export class UsuarioController {
     return this.usuarioRepository.count(where);
   }
 
-  @authenticate({
-    strategy: 'auth',
-    options: [
-      ConfiguracionSeguridad.menuUsuarioId,
-      ConfiguracionSeguridad.listarAccion,
-    ],
-  })
+  //@authenticate({
+  //  strategy: 'auth',
+  //  options: [
+  //    ConfiguracionSeguridad.menuUsuarioId,
+  //    ConfiguracionSeguridad.listarAccion,
+  //  ],
+  //})
   @get('/usuario')
   @response(200, {
     description: 'Array of Usuario model instances',
