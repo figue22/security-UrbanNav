@@ -22,6 +22,7 @@ import {
 import {
   AdministradorLogica,
   ClienteLogica,
+  ConductorLogica,
   Credenciales,
   FactorDeAutenticacionPorCodigo,
   Login,
@@ -147,6 +148,43 @@ export class UsuarioController {
     }
   }
 
+  @post('/usuario/conductor')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {'application/json': {schema: getModelSchemaRef(ConductorLogica)}},
+  })
+  async createConductor(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ConductorLogica)
+        }
+      }
+    })
+    usuario: ConductorLogica,
+  ): Promise<any> {
+    console.log("USUARIO", usuario)
+    // crear la clave}
+    const clave = this.servicioSeguridad.crearTextoAleatorio(10);
+    console.log(clave);
+    //cifrar la clave
+    const claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
+    //asignar la clave cifrada al usuario
+    usuario.clave = claveCifrada;
+    //enviar correo electronico de notificacion
+    const usuarioCreado = await this.usuarioRepository.create({
+      correo: usuario.correo,
+      clave: usuario.clave,
+      rolId: "65243b9b591891311c031c98"
+    });
+
+    const usuarioLogica = await this.servicioSeguridad.crearConductorLogica(usuarioCreado._id!, usuario)
+
+    return {
+      usuario: usuarioCreado,
+      usuarioLogica
+    }
+  }
 
   @get('/usuario/count')
   @response(200, {

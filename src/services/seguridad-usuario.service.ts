@@ -160,6 +160,44 @@ export class SeguridadUsuarioService {
     return response.data
   }
 
+  async crearConductorLogica(mongoId: string, usuarioLogica: any) {
+    console.log({
+      mongoId,
+      usuarioLogica
+    })
+    //crear el vehiculo
+    const vehiculo = {
+      placa: usuarioLogica.placa,
+      marca: usuarioLogica.marca,
+      modelo: usuarioLogica.modelo,
+      soat: usuarioLogica.soat,
+      tecno: usuarioLogica.tecno,
+    }
+
+    const vehiculoCreado = await axios.post("http://localhost:3000/vehiculo", vehiculo)
+
+    //crear el conductor
+    const conductorLogica = {
+      primerNombre: usuarioLogica.primerNombre,
+      segundoNombre: usuarioLogica.segundoNombre,
+      primerApellido: usuarioLogica.primerApellido,
+      segundoApellido: usuarioLogica.segundoApellido,
+      celular: usuarioLogica.celular,
+      estado: usuarioLogica.estado,
+      urlFoto: usuarioLogica.urlFoto,
+      fechaNacimiento: usuarioLogica.fechaNacimiento,
+      documentoIdentidad: usuarioLogica.documentoIdentidad,
+      estadoServicio: usuarioLogica.estadoServicio,
+      idMongoDB: mongoId,
+      vehiculoId: vehiculoCreado.data.idVehiculo,
+      barrioId: usuarioLogica.barrioId
+    }
+
+    const response = await axios.post("http://localhost:3000/conductor", conductorLogica)
+    return response.data;
+
+  }
+
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
     console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO

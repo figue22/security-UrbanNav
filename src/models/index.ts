@@ -9,3 +9,4 @@ export * from './factor-de-autenticacion-por-codigo.model';
 export * from './recuperacion-clave.model';
 export * from './administrador-logica.model';
 export * from './cliente-logica.model';
+export * from './conductor-logica.model';
