@@ -138,6 +138,28 @@ export class SeguridadUsuarioService {
     return response.data
   }
 
+  async crearClienteLogica(mongoId: string, usuarioLogica: any) {
+    console.log({
+      mongoId,
+      usuarioLogica
+    })
+    const clienteLogica = {
+      primerNombre: usuarioLogica.primerNombre,
+      segundoNombre: usuarioLogica.segundoNombre,
+      primerApellido: usuarioLogica.primerApellido,
+      segundoApellido: usuarioLogica.segundoApellido,
+      celular: usuarioLogica.celular,
+      urlFoto: usuarioLogica.urlFoto,
+      correoPanico: usuarioLogica.correoPanico,
+      fechaNacimiento: usuarioLogica.fechaNacimiento,
+      estado: usuarioLogica.estado,
+      descripcion: usuarioLogica.estado,
+      idMongoDB: mongoId
+    }
+    const response = await axios.post("http://localhost:3000/cliente", clienteLogica)
+    return response.data
+  }
+
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
     console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO

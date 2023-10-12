@@ -21,6 +21,7 @@ import {
 } from '@loopback/rest';
 import {
   AdministradorLogica,
+  ClienteLogica,
   Credenciales,
   FactorDeAutenticacionPorCodigo,
   Login,
@@ -40,7 +41,7 @@ export class UsuarioController {
     public loginRepository: LoginRepository,
   ) { }
 
-  //? USUARIO NORMAL (NO ADMIN, NO CLIENTE, NO CONDUCTOR)
+  //? USUARIO NORMAL (NO ADMIN, NO CLIENTE, NO CONDUCTOR) <---- No usar
   @post('/usuario')
   @response(200, {
     description: 'Usuario model instance',
@@ -68,24 +69,6 @@ export class UsuarioController {
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
     return this.usuarioRepository.create(usuario);
-
-    // let idRolCliente = "65243b86591891311c031c97"
-    // let idRolConductor = "65243b9b591891311c031c98"
-    // let idRolAdministrador = "65145f6950ef6641e8e8d370"
-
-    // if(usuario.rolId=== idRolCliente) {
-
-    // }
-    // if(usuario.rolId=== idRolConductor) {
-
-    // }
-    // if(usuario.rolId=== idRolAdministrador) {
-
-    // }
-
-
-    // //TODO: CREAR EL USUARIO EN EL MICROSERVICIO DE LÓGICA
-    // //? LLAMAR AL MICROSERVICIO DE LÓGICA Y CREARLO ALLÁ TAMBIÉN
   }
 
   @post('/usuario/admin')
@@ -125,6 +108,45 @@ export class UsuarioController {
       usuarioLogica
     }
   }
+
+  @post('/usuario/cliente')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {'application/json': {schema: getModelSchemaRef(ClienteLogica)}},
+  })
+  async createCliente(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ClienteLogica)
+        }
+      }
+    })
+    usuario: ClienteLogica,
+  ): Promise<any> {
+    console.log("USUARIO", usuario)
+    // crear la clave}
+    const clave = this.servicioSeguridad.crearTextoAleatorio(10);
+    console.log(clave);
+    //cifrar la clave
+    const claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
+    //asignar la clave cifrada al usuario
+    usuario.clave = claveCifrada;
+    //enviar correo electronico de notificacion
+    const usuarioCreado = await this.usuarioRepository.create({
+      correo: usuario.correo,
+      clave: usuario.clave,
+      rolId: "65243b86591891311c031c97"
+    });
+
+    const usuarioLogica = await this.servicioSeguridad.crearClienteLogica(usuarioCreado._id!, usuario)
+
+    return {
+      usuario: usuarioCreado,
+      usuarioLogica
+    }
+  }
+
 
   @get('/usuario/count')
   @response(200, {
