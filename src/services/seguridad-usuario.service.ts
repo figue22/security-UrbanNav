@@ -199,6 +199,7 @@ export class SeguridadUsuarioService {
   }
 
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
+    console.log(id, rol)
     console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
     if (rol === "CLIENTE") {

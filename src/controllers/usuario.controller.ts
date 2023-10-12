@@ -195,13 +195,13 @@ export class UsuarioController {
     return this.usuarioRepository.count(where);
   }
 
-  //@authenticate({
-  //  strategy: 'auth',
-  //  options: [
-  //    ConfiguracionSeguridad.menuUsuarioId,
-  //    ConfiguracionSeguridad.listarAccion,
-  //  ],
-  //})
+  // @authenticate({
+  //   strategy: 'auth',
+  //   options: [
+  //     ConfiguracionSeguridad.menuUsuarioId,
+  //     ConfiguracionSeguridad.listarAccion,
+  //   ],
+  // })
   @get('/usuario')
   @response(200, {
     description: 'Array of Usuario model instances',
@@ -256,8 +256,36 @@ export class UsuarioController {
     @param.path.string('id') id: string,
     @param.filter(Usuario, {exclude: 'where'})
     filter?: FilterExcludingWhere<Usuario>,
-  ): Promise<Usuario> {
-    return this.usuarioRepository.findById(id, filter);
+  ): Promise<any> {
+    const usuario = await this.usuarioRepository.findById(id, filter);
+
+    let idRolCliente = "65243b86591891311c031c97"
+    let idRolConductor = "65243b9b591891311c031c98"
+    let idRolAdministrador = "65145f6950ef6641e8e8d370"
+
+    if (idRolCliente == usuario.rolId) {
+      const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
+      return {
+        usuario,
+        usuarioEnLogica
+      }
+    }
+
+    if (idRolConductor == usuario.rolId) {
+      const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CONDUCTOR")
+      return {
+        usuario,
+        usuarioEnLogica
+      }
+    }
+
+    if (idRolAdministrador == usuario.rolId) {
+      const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "ADMINISTRADOR")
+      return {
+        usuario,
+        usuarioEnLogica
+      }
+    }
   }
 
   @patch('/usuario/{id}')
