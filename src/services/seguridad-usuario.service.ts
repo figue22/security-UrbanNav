@@ -112,6 +112,11 @@ export class SeguridadUsuarioService {
     return obj.role;
   }
 
+  /**
+   *
+   * @param correo el correo del usuario
+   * @returns una cadena aleatoria de 6 caracteres
+   */
   async recuperarContrasena(correo: string): Promise<string> {
     const clave = this.crearTextoAleatorio(6);
     const claveCifrada = this.cifrarTexto(clave);
@@ -122,6 +127,13 @@ export class SeguridadUsuarioService {
     return claveCifrada;
   }
 
+
+  /**
+   *
+   * @param mongoId el mongoID del admin
+   * @param usuarioLogica el admin que se va a crear la logica
+   * @returns el admin creado en la logica
+   */
   async crearAdministradorLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
@@ -138,6 +150,12 @@ export class SeguridadUsuarioService {
     return response.data
   }
 
+  /**
+   *
+   * @param mongoId el mongoID del cliente
+   * @param usuarioLogica  el cliente que se va a crear la logica
+   * @returns el cliente creado en la logica
+   */
   async crearClienteLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
@@ -160,6 +178,12 @@ export class SeguridadUsuarioService {
     return response.data
   }
 
+  /**
+   *
+   * @param mongoId el mongoID del conductor
+   * @param usuarioLogica  el conductor que se va a crear la logica
+   * @returns  el conductor creado en la logica
+   */
   async crearConductorLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
@@ -198,6 +222,12 @@ export class SeguridadUsuarioService {
 
   }
 
+  /**
+   *
+   * @param id el id de Mongo del usuario a buscar en lógica
+   * @param rol el rol del usuario a buscar en lógica (ADMINISTRADOR, CLIENTE, CONDUCTOR)
+   * @returns la información del usuario en lógica
+   */
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
     console.log(id, rol)
     console.log("entroooooooooooooo")
@@ -216,15 +246,16 @@ export class SeguridadUsuarioService {
     }
   }
 
+  /**
+   *
+   * @param usuarios los usuarios a los que se les va a obtener la información en lógica
+   * @returns  los usuarios con la información en lógica
+   */
   async obtenerInformacionUsuariosEnLogica(usuarios: Usuario[]) {
-
-    let idRolCliente = "65243b86591891311c031c97"
-    let idRolConductor = "65243b9b591891311c031c98"
-    let idRolAdministrador = "65145f6950ef6641e8e8d370"
 
     let usuariosCompletos = usuarios.map(async (usuario) => {
 
-      if (usuario.rolId == idRolCliente) {
+      if (usuario.rolId == ConfiguracionSeguridad.idClienteRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "CLIENTE"
@@ -235,7 +266,7 @@ export class SeguridadUsuarioService {
         }
       }
 
-      if (usuario.rolId == idRolConductor) {
+      if (usuario.rolId == ConfiguracionSeguridad.idConductorRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "CONDUCTOR"
@@ -247,7 +278,7 @@ export class SeguridadUsuarioService {
         }
       }
 
-      if (usuario.rolId == idRolAdministrador) {
+      if (usuario.rolId == ConfiguracionSeguridad.idAdminRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
           "ADMINISTRADOR"
