@@ -31,6 +31,7 @@ import {
 } from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {SeguridadUsuarioService} from '../services';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 
 export class UsuarioController {
   constructor(
@@ -99,7 +100,7 @@ export class UsuarioController {
     const usuarioCreado = await this.usuarioRepository.create({
       correo: usuario.correo,
       clave: usuario.clave,
-      rolId: "65145f6950ef6641e8e8d370"
+      rolId: ConfiguracionSeguridad.idAdminRol
     });
 
     const usuarioLogica = await this.servicioSeguridad.crearAdministradorLogica(usuarioCreado._id!, usuario)
@@ -137,7 +138,7 @@ export class UsuarioController {
     const usuarioCreado = await this.usuarioRepository.create({
       correo: usuario.correo,
       clave: usuario.clave,
-      rolId: "65243b86591891311c031c97"
+      rolId: ConfiguracionSeguridad.idClienteRol
     });
 
     const usuarioLogica = await this.servicioSeguridad.crearClienteLogica(usuarioCreado._id!, usuario)
@@ -175,7 +176,7 @@ export class UsuarioController {
     const usuarioCreado = await this.usuarioRepository.create({
       correo: usuario.correo,
       clave: usuario.clave,
-      rolId: "65243b9b591891311c031c98"
+      rolId: ConfiguracionSeguridad.idConductorRol
     });
 
     const usuarioLogica = await this.servicioSeguridad.crearConductorLogica(usuarioCreado._id!, usuario)
@@ -259,11 +260,7 @@ export class UsuarioController {
   ): Promise<any> {
     const usuario = await this.usuarioRepository.findById(id, filter);
 
-    let idRolCliente = "65243b86591891311c031c97"
-    let idRolConductor = "65243b9b591891311c031c98"
-    let idRolAdministrador = "65145f6950ef6641e8e8d370"
-
-    if (idRolCliente == usuario.rolId) {
+    if (usuario.rolId == ConfiguracionSeguridad.idClienteRol) {
       const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
       return {
         usuario,
@@ -271,7 +268,7 @@ export class UsuarioController {
       }
     }
 
-    if (idRolConductor == usuario.rolId) {
+    if (usuario.rolId == ConfiguracionSeguridad.idConductorRol) {
       const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CONDUCTOR")
       return {
         usuario,
@@ -279,7 +276,7 @@ export class UsuarioController {
       }
     }
 
-    if (idRolAdministrador == usuario.rolId) {
+    if (usuario.rolId == ConfiguracionSeguridad.idAdminRol) {
       const usuarioEnLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "ADMINISTRADOR")
       return {
         usuario,
@@ -355,7 +352,7 @@ export class UsuarioController {
       login.estadoToken = false;
       await this.loginRepository.create(login);
       usuario.clave = '';
-      //notificar al usuario via sms
+      //TODO: notificar al usuario
 
       return usuario;
     }
@@ -379,19 +376,15 @@ export class UsuarioController {
     const usuario = await this.servicioSeguridad.validarCodigo2fa(credenciales);
     if (usuario) {
       console.log(usuario)
-      let idRolCliente = "65243b86591891311c031c97"
-      let idRolConductor = "65243b9b591891311c031c98"
-      let idRolAdministrador = "65145f6950ef6641e8e8d370"
-
       let usuarioLogica = null
 
-      if (usuario.rolId == idRolCliente) {
+      if (usuario.rolId == ConfiguracionSeguridad.idClienteRol) {
         usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
       }
-      if (usuario.rolId == idRolConductor) {
+      if (usuario.rolId == ConfiguracionSeguridad.idConductorRol) {
         usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CONDUCTOR")
       }
-      if (usuario.rolId == idRolAdministrador) {
+      if (usuario.rolId == ConfiguracionSeguridad.idAdminRol) {
         usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "ADMINISTRADOR")
       }
 
