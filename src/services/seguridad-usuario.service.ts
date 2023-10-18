@@ -17,9 +17,6 @@ export class SeguridadUsuarioService {
     @repository(LoginRepository)
     public repositorioLogin: LoginRepository,
   ) { }
-  /*
-   * Add service methods here
-   */
 
   /**
    * Metodo que sirve para crear una clave aleatoria.
@@ -146,7 +143,7 @@ export class SeguridadUsuarioService {
       segundoApellido: usuarioLogica.segundoApellido,
       idMongoDB: mongoId
     }
-    const response = await axios.post("http://localhost:3000/administrador", administradorLogica)
+    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador`, administradorLogica)
     return response.data
   }
 
@@ -174,7 +171,7 @@ export class SeguridadUsuarioService {
       descripcion: usuarioLogica.estado,
       idMongoDB: mongoId
     }
-    const response = await axios.post("http://localhost:3000/cliente", clienteLogica)
+    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente`, clienteLogica)
     return response.data
   }
 
@@ -198,7 +195,7 @@ export class SeguridadUsuarioService {
       tecno: usuarioLogica.tecno,
     }
 
-    const vehiculoCreado = await axios.post("http://localhost:3000/vehiculo", vehiculo)
+    const vehiculoCreado = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/vehiculo`, vehiculo)
 
     //crear el conductor
     const conductorLogica = {
@@ -217,7 +214,7 @@ export class SeguridadUsuarioService {
       barrioId: usuarioLogica.barrioId
     }
 
-    const response = await axios.post("http://localhost:3000/conductor", conductorLogica)
+    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor`, conductorLogica)
     return response.data;
 
   }
@@ -230,18 +227,17 @@ export class SeguridadUsuarioService {
    */
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
     console.log(id, rol)
-    console.log("entroooooooooooooo")
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
     if (rol === "CLIENTE") {
-      const response = await axios.get(`http://localhost:3000/cliente/mongo/${id}`)
+      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente/mongo/${id}`)
       return response.data
     }
     if (rol === "CONDUCTOR") {
-      const response = await axios.get(`http://localhost:3000/conductor/mongo/${id}`)
+      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor/mongo/${id}`)
       return response.data
     }
     if (rol === "ADMINISTRADOR") {
-      const response = await axios.get(`http://localhost:3000/administrador/mongo/${id}`)
+      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador/mongo/${id}`)
       return response.data
     }
   }
