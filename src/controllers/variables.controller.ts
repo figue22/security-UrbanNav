@@ -42,9 +42,21 @@ export class VariablesController {
         },
       },
     })
-    variables: Omit<Variables, '_id'>,
-  ): Promise<Variables> {
-    return this.variablesRepository.create(variables);
+    variable: Variables,
+  ): Promise<any> {
+
+    let variableExistente = await this.variablesRepository.findOne({where: {nombreVariable: variable.nombreVariable}});
+    console.log(variableExistente)
+
+    // si ya existe la variable, no se crea, se actualiza
+    if(variableExistente){
+      let variableActualizada = await this.variablesRepository.updateById(variableExistente._id!, variable);
+      return variableActualizada;
+    } else {
+      // si no existe, se crea
+      variable = await this.variablesRepository.create(variable);
+      return variable;
+    }
   }
 
   @get('/variable/count')
