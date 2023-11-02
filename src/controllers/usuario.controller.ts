@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -19,6 +20,8 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import axios from 'axios';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {
   AdministradorLogica,
   ClienteLogica,
@@ -31,8 +34,6 @@ import {
 } from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {SeguridadUsuarioService} from '../services';
-import {ConfiguracionSeguridad} from '../config/seguridad.config';
-import {authenticate} from '@loopback/authentication';
 
 export class UsuarioController {
   constructor(
@@ -106,6 +107,14 @@ export class UsuarioController {
 
     const usuarioLogica = await this.servicioSeguridad.crearAdministradorLogica(usuarioCreado._id!, usuario)
 
+    //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
+    axios.post('http://localhost:8080/enviar-correo', {
+      to: usuario.correo,
+      name: usuarioLogica.primerNombre,
+      content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
+      subject: "Bienvenido a UrbanNav"
+    })
+
     return {
       usuario: usuarioCreado,
       usuarioLogica
@@ -144,6 +153,14 @@ export class UsuarioController {
 
     const usuarioLogica = await this.servicioSeguridad.crearClienteLogica(usuarioCreado._id!, usuario)
 
+    //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
+    axios.post('http://localhost:8080/enviar-correo', {
+      to: usuario.correo,
+      name: usuarioLogica.primerNombre,
+      content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
+      subject: "Bienvenido a UrbanNav"
+    })
+
     return {
       usuario: usuarioCreado,
       usuarioLogica
@@ -181,6 +198,14 @@ export class UsuarioController {
     });
 
     const usuarioLogica = await this.servicioSeguridad.crearConductorLogica(usuarioCreado._id!, usuario)
+
+    //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
+    axios.post('http://localhost:8080/enviar-correo', {
+      to: usuario.correo,
+      name: usuarioLogica.primerNombre,
+      content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
+      subject: "Bienvenido a UrbanNav"
+    })
 
     return {
       usuario: usuarioCreado,
@@ -354,6 +379,13 @@ export class UsuarioController {
       await this.loginRepository.create(login);
       usuario.clave = '';
       //TODO: notificar al usuario
+      //llamar al microservicio de notificaciones para enviar el codigo2fa
+      axios.post('http://localhost:8080/enviar-correo', {
+        to: usuario.correo,
+        name: "Amig@",
+        content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+        subject: "Código de verificación UrbanNav"
+      })
 
       return usuario;
     }
@@ -448,6 +480,14 @@ export class UsuarioController {
         usuarioEncontrado.correo,
       );
       //TODO: enviar correo electronico con la nueva clave al usuario
+      //Llamar a notrificaciones para enviar correo con la nueva contraseña
+      axios.post('http://localhost:8080/enviar-correo', {
+        to: recuperacionClave.correo,
+        name: "Amig@",
+        content: `Tu nueva clave es: ${nuevaClave}`,
+        subject: "Nueva clave UrbanNav"
+      })
+
       return {
         mensaje: `La nueva clave ha sido generada, usuario: ${usuarioEncontrado.correo}`,
         nuevaClave

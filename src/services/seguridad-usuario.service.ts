@@ -121,7 +121,7 @@ export class SeguridadUsuarioService {
       {clave: claveCifrada},
       {correo: correo},
     );
-    return claveCifrada;
+    return clave;
   }
 
 
