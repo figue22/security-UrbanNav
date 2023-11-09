@@ -83,6 +83,21 @@ export class SeguridadUsuarioService {
     return null;
   }
 
+  //verificar token si es valido, retorna la info
+  verificarToken(token: string): object | null {
+    try {
+      // Verifica el token utilizando la clave secreta
+      const decoded = jwt.verify(token, ConfiguracionSeguridad.claveJWT);
+
+      // El token es válido, devuelve la información contenida en él
+      return decoded;
+    } catch(e) {
+        console.log(e)
+        return null
+    }
+  }
+
+
   /**
    * Generacion del jwt
    * @param usuario informacion del usuario

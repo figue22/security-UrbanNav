@@ -75,6 +75,34 @@ export class UsuarioController {
     return this.usuarioRepository.create(usuario);
   }
 
+  @post('/usuario/verificar-token')
+  @response(200, {
+    description: 'Usuario model instance',
+  })
+  async verificarToken(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              }
+            }
+          }
+        }
+      }
+    })
+    data: any,
+  ): Promise<any> {
+    console.log(data.token)
+    const resp = await this.servicioSeguridad.verificarToken(data.token)
+    return resp
+  }
+
+
+
   @post('/usuario/admin')
   @response(200, {
     description: 'Usuario model instance',
