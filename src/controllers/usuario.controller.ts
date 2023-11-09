@@ -411,7 +411,7 @@ export class UsuarioController {
       console.log(usuarioLogica.celular)
       //TODO: notificar al usuario
       //llamar al microservicio de notificaciones para enviar el codigo2fa
-      const resp = await axios.post('http://localhost:8080/enviar-sms', {
+      const resp = await axios.post('https://notificaciones-urbannav.onrender.com/enviar-sms', {
         Message: `El código de verificación de UrbanNav es: ${codigo2fa}`,
         PhoneNumber: `+57${usuarioLogica.celular}`,
       })
