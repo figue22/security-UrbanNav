@@ -136,7 +136,7 @@ export class UsuarioController {
     const usuarioLogica = await this.servicioSeguridad.crearAdministradorLogica(usuarioCreado._id!, usuario)
 
     //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
-    axios.post('http://localhost:8080/enviar-correo', {
+    axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
       to: usuario.correo,
       name: usuarioLogica.primerNombre,
       content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
@@ -182,7 +182,7 @@ export class UsuarioController {
     const usuarioLogica = await this.servicioSeguridad.crearClienteLogica(usuarioCreado._id!, usuario)
 
     //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
-    axios.post('http://localhost:8080/enviar-correo', {
+    axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
       to: usuario.correo,
       name: usuarioLogica.primerNombre,
       content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
@@ -228,7 +228,7 @@ export class UsuarioController {
     const usuarioLogica = await this.servicioSeguridad.crearConductorLogica(usuarioCreado._id!, usuario)
 
     //Llamar a notrificaciones para enviar correo de bienvenida y contraseña
-    axios.post('http://localhost:8080/enviar-correo', {
+    axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
       to: usuario.correo,
       name: usuarioLogica.primerNombre,
       content: `Bienvenido a UrbanNav, tu clave es: ${clave}`,
@@ -408,7 +408,7 @@ export class UsuarioController {
       usuario.clave = '';
       //TODO: notificar al usuario
       //llamar al microservicio de notificaciones para enviar el codigo2fa
-      axios.post('http://localhost:8080/enviar-correo', {
+      axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
         to: usuario.correo,
         name: "Amig@",
         content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
@@ -509,7 +509,7 @@ export class UsuarioController {
       );
       //TODO: enviar correo electronico con la nueva clave al usuario
       //Llamar a notrificaciones para enviar correo con la nueva contraseña
-      axios.post('http://localhost:8080/enviar-correo', {
+      axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
         to: recuperacionClave.correo,
         name: "Amig@",
         content: `Tu nueva clave es: ${nuevaClave}`,
