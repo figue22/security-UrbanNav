@@ -290,4 +290,18 @@ export class SeguridadUsuarioService {
     return Promise.all(usuariosCompletos)
 
   }
+
+  //metodo que verifique si un correo esta en la base de datos, si esta nos da un error, si no esta retorna el correo ingresado
+
+  async verificarCorreo(correo: string): Promise<string> {
+    const usuario = await this.repositorioUsuario.findOne({
+      where: {
+        correo: correo
+      }
+    })
+    if (usuario) {
+      throw new Error("El correo ya se encuentra registrado")
+    }
+    return correo
+  }
 }

@@ -100,7 +100,7 @@ export class UsuarioController {
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
     const usuarioCreado = await this.usuarioRepository.create({
-      correo: usuario.correo,
+      correo: await this.servicioSeguridad.verificarCorreo(usuario.correo),
       clave: usuario.clave,
       rolId: ConfiguracionSeguridad.idAdminRol
     });
@@ -146,7 +146,7 @@ export class UsuarioController {
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
     const usuarioCreado = await this.usuarioRepository.create({
-      correo: usuario.correo,
+      correo: await this.servicioSeguridad.verificarCorreo(usuario.correo),
       clave: usuario.clave,
       rolId: ConfiguracionSeguridad.idClienteRol
     });
@@ -192,7 +192,7 @@ export class UsuarioController {
     usuario.clave = claveCifrada;
     //enviar correo electronico de notificacion
     const usuarioCreado = await this.usuarioRepository.create({
-      correo: usuario.correo,
+      correo: await this.servicioSeguridad.verificarCorreo(usuario.correo),
       clave: usuario.clave,
       rolId: ConfiguracionSeguridad.idConductorRol
     });
