@@ -394,8 +394,13 @@ export class UsuarioController {
     })
     credenciales: Credenciales,
   ): Promise<object> {
+    console.log("IDENTIFICANDOR USUARIO")
     const usuario =
       await this.servicioSeguridad.identificarUsuario(credenciales);
+
+      console.log("credenciales",credenciales)
+      console.log("user", usuario)
+
     if (usuario) {
       const codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
       const login: Login = new Login();
@@ -407,20 +412,46 @@ export class UsuarioController {
       await this.loginRepository.create(login);
       usuario.clave = '';
       const rolId = usuario.rolId;
-      let usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
-      //TODO: notificar al usuario
-      //llamar al microservicio de notificaciones para enviar el codigo2fa
-      const resp = await axios.post('https://notificaciones-urbannav.onrender.com/enviar-sms', {
-        Message: `El código de verificación de UrbanNav es: ${codigo2fa}`,
-        PhoneNumber: `+57${usuarioLogica.celular}`,
-      })
 
-      axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
-        to: usuario.correo,
-        name: "Amig@",
-        content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
-        subject: "Código de verificación UrbanNav"
-      })
+      console.log(usuario)
+
+      if(rolId == ConfiguracionSeguridad.idClienteRol){
+        let usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CLIENTE")
+        //TODO: notificar al usuario
+          const resp = await axios.post('https://notificaciones-urbannav.onrender.com/enviar-sms', {
+          Message: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+          PhoneNumber: `+57${usuarioLogica.celular}`,
+          })
+
+        axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
+          to: usuario.correo,
+          name: "Amig@",
+          content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+          subject: "Código de verificación UrbanNav"
+        })
+      } else if(rolId == ConfiguracionSeguridad.idConductorRol){
+        let usuarioLogica = await this.servicioSeguridad.obtenerInformacionUsuarioEnLogica(usuario._id!, "CONDUCTOR")
+
+        const resp = await axios.post('https://notificaciones-urbannav.onrender.com/enviar-sms', {
+          Message: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+          PhoneNumber: `+57${usuarioLogica.celular}`,
+          })
+
+        axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
+          to: usuario.correo,
+          name: "Amig@",
+          content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+          subject: "Código de verificación UrbanNav"
+        })
+      } else if(rolId == ConfiguracionSeguridad.idAdminRol){
+        axios.post('https://notificaciones-urbannav.onrender.com/enviar-correo', {
+          to: usuario.correo,
+          name: "Amig@",
+          content: `El código de verificación de UrbanNav es: ${codigo2fa}`,
+          subject: "Código de verificación UrbanNav"
+        })
+        console.log('codigo enviado')
+      }
 
       return usuario;
     }
