@@ -56,7 +56,24 @@ export class SeguridadUsuarioService {
         clave: credenciales.clave,
       },
     });
-    return usuario as Usuario;
+
+    let idMongo = usuario?._id
+    let rol = usuario?.rolId
+
+    if (rol == "65243b86591891311c031c97") {
+      rol = "CLIENTE"
+    } else if (rol == "65243b9b591891311c031c98") {
+      rol = "CONDUCTOR"
+    }
+
+    console.log("---" + rol)
+
+    let usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(idMongo!, rol!)
+    if (usuarioLogica.estado === "ACTIVO") {
+      return usuario as Usuario;
+    } else {
+      return null
+    }
   }
 
   /**
@@ -91,9 +108,9 @@ export class SeguridadUsuarioService {
 
       // El token es válido, devuelve la información contenida en él
       return decoded;
-    } catch(e) {
-        console.log(e)
-        return null
+    } catch (e) {
+      console.log(e)
+      return null
     }
   }
 
