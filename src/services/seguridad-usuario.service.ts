@@ -1,4 +1,4 @@
-import { /* inject, */ BindingScope, injectable} from '@loopback/core';
+import {/* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import axios from 'axios';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
@@ -16,7 +16,7 @@ export class SeguridadUsuarioService {
 
     @repository(LoginRepository)
     public repositorioLogin: LoginRepository,
-  ) { }
+  ) {}
 
   /**
    * Metodo que sirve para crear una clave aleatoria.
@@ -57,22 +57,32 @@ export class SeguridadUsuarioService {
       },
     });
 
-    let idMongo = usuario?._id
-    let rol = usuario?.rolId
+    let idMongo = usuario?._id;
+    let rol = usuario?.rolId;
 
-    if (rol == "65243b86591891311c031c97") {
-      rol = "CLIENTE"
-    } else if (rol == "65243b9b591891311c031c98") {
-      rol = "CONDUCTOR"
+    if (rol == '65243b86591891311c031c97') {
+      rol = 'CLIENTE';
+    } else if (rol == '65243b9b591891311c031c98') {
+      rol = 'CONDUCTOR';
+    } else {
+      rol = 'ADMINISTRADOR';
     }
 
-    console.log("---" + rol)
+    console.log('---' + rol);
 
-    let usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(idMongo!, rol!)
-    if (usuarioLogica.estado === "ACTIVO") {
+    let usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
+      idMongo!,
+      rol!,
+    );
+
+    if (usuarioLogica && rol === 'ADMINISTRADOR') {
+      return usuario as Usuario;
+    }
+
+    if (usuarioLogica.estado === 'ACTIVO') {
       return usuario as Usuario;
     } else {
-      return null
+      return null;
     }
   }
 
@@ -109,11 +119,10 @@ export class SeguridadUsuarioService {
       // El token es válido, devuelve la información contenida en él
       return decoded;
     } catch (e) {
-      console.log(e)
-      return null
+      console.log(e);
+      return null;
     }
   }
-
 
   /**
    * Generacion del jwt
@@ -125,7 +134,7 @@ export class SeguridadUsuarioService {
       name: `${usuarioLogica.primerNombre}`,
       role: `${usuario.rolId}`,
       email: `${usuario.correo}`,
-      idMongoDB: `${usuarioLogica.idMongoDB}`
+      idMongoDB: `${usuarioLogica.idMongoDB}`,
     };
     const token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
     return token;
@@ -156,7 +165,6 @@ export class SeguridadUsuarioService {
     return clave;
   }
 
-
   /**
    *
    * @param mongoId el mongoID del admin
@@ -166,17 +174,20 @@ export class SeguridadUsuarioService {
   async crearAdministradorLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
-      usuarioLogica
-    })
+      usuarioLogica,
+    });
     const administradorLogica = {
       primerNombre: usuarioLogica.primerNombre,
       segundoNombre: usuarioLogica.segundoNombre,
       primerApellido: usuarioLogica.primerApellido,
       segundoApellido: usuarioLogica.segundoApellido,
-      idMongoDB: mongoId
-    }
-    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador`, administradorLogica)
-    return response.data
+      idMongoDB: mongoId,
+    };
+    const response = await axios.post(
+      `${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador`,
+      administradorLogica,
+    );
+    return response.data;
   }
 
   /**
@@ -188,8 +199,8 @@ export class SeguridadUsuarioService {
   async crearClienteLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
-      usuarioLogica
-    })
+      usuarioLogica,
+    });
     const clienteLogica = {
       primerNombre: usuarioLogica.primerNombre,
       segundoNombre: usuarioLogica.segundoNombre,
@@ -201,10 +212,13 @@ export class SeguridadUsuarioService {
       fechaNacimiento: usuarioLogica.fechaNacimiento,
       estado: usuarioLogica.estado,
       descripcion: usuarioLogica.estado,
-      idMongoDB: mongoId
-    }
-    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente`, clienteLogica)
-    return response.data
+      idMongoDB: mongoId,
+    };
+    const response = await axios.post(
+      `${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente`,
+      clienteLogica,
+    );
+    return response.data;
   }
 
   /**
@@ -216,8 +230,8 @@ export class SeguridadUsuarioService {
   async crearConductorLogica(mongoId: string, usuarioLogica: any) {
     console.log({
       mongoId,
-      usuarioLogica
-    })
+      usuarioLogica,
+    });
     //crear el vehiculo
     const vehiculo = {
       placa: usuarioLogica.placa,
@@ -225,9 +239,12 @@ export class SeguridadUsuarioService {
       modelo: usuarioLogica.modelo,
       soat: usuarioLogica.soat,
       tecno: usuarioLogica.tecno,
-    }
+    };
 
-    const vehiculoCreado = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/vehiculo`, vehiculo)
+    const vehiculoCreado = await axios.post(
+      `${ConfiguracionSeguridad.urlMicroservicioLogica}/vehiculo`,
+      vehiculo,
+    );
 
     //crear el conductor
     const conductorLogica = {
@@ -243,12 +260,14 @@ export class SeguridadUsuarioService {
       estadoServicio: usuarioLogica.estadoServicio,
       idMongoDB: mongoId,
       vehiculoId: vehiculoCreado.data.idVehiculo,
-      barrioId: usuarioLogica.barrioId
-    }
+      barrioId: usuarioLogica.barrioId,
+    };
 
-    const response = await axios.post(`${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor`, conductorLogica)
+    const response = await axios.post(
+      `${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor`,
+      conductorLogica,
+    );
     return response.data;
-
   }
 
   /**
@@ -258,19 +277,25 @@ export class SeguridadUsuarioService {
    * @returns la información del usuario en lógica
    */
   async obtenerInformacionUsuarioEnLogica(id: string, rol: string) {
-    console.log(id, rol)
+    console.log(id, rol);
     //TODO: HACER UNA LLAMADA A LÓGICA PARA OBTENER LA INFORMACION DE UN USUARIO POR SU IDMONGO
-    if (rol === "CLIENTE") {
-      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente/mongo/${id}`)
-      return response.data
+    if (rol === 'CLIENTE') {
+      const response = await axios.get(
+        `${ConfiguracionSeguridad.urlMicroservicioLogica}/cliente/mongo/${id}`,
+      );
+      return response.data;
     }
-    if (rol === "CONDUCTOR") {
-      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor/mongo/${id}`)
-      return response.data
+    if (rol === 'CONDUCTOR') {
+      const response = await axios.get(
+        `${ConfiguracionSeguridad.urlMicroservicioLogica}/conductor/mongo/${id}`,
+      );
+      return response.data;
     }
-    if (rol === "ADMINISTRADOR") {
-      const response = await axios.get(`${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador/mongo/${id}`)
-      return response.data
+    if (rol === 'ADMINISTRADOR') {
+      const response = await axios.get(
+        `${ConfiguracionSeguridad.urlMicroservicioLogica}/administrador/mongo/${id}`,
+      );
+      return response.data;
     }
   }
 
@@ -280,47 +305,43 @@ export class SeguridadUsuarioService {
    * @returns  los usuarios con la información en lógica
    */
   async obtenerInformacionUsuariosEnLogica(usuarios: Usuario[]) {
-
-    let usuariosCompletos = usuarios.map(async (usuario) => {
-
+    let usuariosCompletos = usuarios.map(async usuario => {
       if (usuario.rolId == ConfiguracionSeguridad.idClienteRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
-          "CLIENTE"
-        )
+          'CLIENTE',
+        );
         return {
           usuario,
-          usuarioLogica: usuarioLogica ? usuarioLogica : null
-        }
+          usuarioLogica: usuarioLogica ? usuarioLogica : null,
+        };
       }
 
       if (usuario.rolId == ConfiguracionSeguridad.idConductorRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
-          "CONDUCTOR"
-        )
+          'CONDUCTOR',
+        );
 
         return {
           usuario,
-          usuarioLogica: usuarioLogica ? usuarioLogica : null
-        }
+          usuarioLogica: usuarioLogica ? usuarioLogica : null,
+        };
       }
 
       if (usuario.rolId == ConfiguracionSeguridad.idAdminRol) {
         const usuarioLogica = await this.obtenerInformacionUsuarioEnLogica(
           usuario._id!,
-          "ADMINISTRADOR"
-        )
+          'ADMINISTRADOR',
+        );
         return {
           usuario,
-          usuarioLogica: usuarioLogica ? usuarioLogica : null
-        }
+          usuarioLogica: usuarioLogica ? usuarioLogica : null,
+        };
       }
+    });
 
-    })
-
-    return Promise.all(usuariosCompletos)
-
+    return Promise.all(usuariosCompletos);
   }
 
   //metodo que verifique si un correo esta en la base de datos, si esta nos da un error, si no esta retorna el correo ingresado
@@ -328,12 +349,12 @@ export class SeguridadUsuarioService {
   async verificarCorreo(correo: string): Promise<string> {
     const usuario = await this.repositorioUsuario.findOne({
       where: {
-        correo: correo
-      }
-    })
+        correo: correo,
+      },
+    });
     if (usuario) {
-      throw new Error("El correo ya se encuentra registrado")
+      throw new Error('El correo ya se encuentra registrado');
     }
-    return correo
+    return correo;
   }
 }
